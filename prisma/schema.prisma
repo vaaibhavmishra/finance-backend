@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Enums
+// ============================================
+
+enum Role {
+  VIEWER
+  ANALYST
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RecordType {
+  INCOME
+  EXPENSE
+}
+
+enum Category {
+  SALARY
+  FREELANCE
+  INVESTMENT
+  BUSINESS
+  RENTAL
+  FOOD
+  TRANSPORTATION
+  UTILITIES
+  ENTERTAINMENT
+  HEALTHCARE
+  EDUCATION
+  SHOPPING
+  TRAVEL
+  INSURANCE
+  TAXES
+  OTHER
+}
+
+// ============================================
+// Models
+// ============================================
+
+/// User model — stores authentication info, role, and status
+model User {
+  id        String     @id @default(uuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role       @default(VIEWER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  records FinancialRecord[]
+
+  @@map("users")
+}
+
+/// Financial record — income or expense entry with categorization
+model FinancialRecord {
+  id          String     @id @default(uuid())
+  amount      Float
+  type        RecordType
+  category    Category   @default(OTHER)
+  date        DateTime   @default(now())
+  description String?
+  isDeleted   Boolean    @default(false) @map("is_deleted")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes for query performance
+  @@index([userId])
+  @@index([type])
+  @@index([category])
+  @@index([date])
+  @@index([userId, date, type])
+  @@map("financial_records")
+}

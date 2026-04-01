@@ -1,0 +1,44 @@
+/**
+ * Application-wide constants
+ */
+
+export const ROLES = {
+  VIEWER: 'VIEWER',
+  ANALYST: 'ANALYST',
+  ADMIN: 'ADMIN',
+} as const;
+
+export const USER_STATUS = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+} as const;
+
+export const RECORD_TYPE = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE',
+} as const;
+
+export const CATEGORIES = {
+  SALARY: 'SALARY',
+  FREELANCE: 'FREELANCE',
+  INVESTMENT: 'INVESTMENT',
+  BUSINESS: 'BUSINESS',
+  RENTAL: 'RENTAL',
+  FOOD: 'FOOD',
+  TRANSPORTATION: 'TRANSPORTATION',
+  UTILITIES: 'UTILITIES',
+  ENTERTAINMENT: 'ENTERTAINMENT',
+  HEALTHCARE: 'HEALTHCARE',
+  EDUCATION: 'EDUCATION',
+  SHOPPING: 'SHOPPING',
+  TRAVEL: 'TRAVEL',
+  INSURANCE: 'INSURANCE',
+  TAXES: 'TAXES',
+  OTHER: 'OTHER',
+} as const;
+
+export const PAGINATION = {
+  DEFAULT_PAGE: 1,
+  DEFAULT_LIMIT: 10,
+  MAX_LIMIT: 100,
+} as const;
