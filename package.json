@@ -20,7 +20,7 @@
   },
   "keywords": ["finance", "backend", "api", "rbac", "typescript", "prisma", "express"],
   "author": "Vaibhav Mishra",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",
     "@prisma/client": "^7.6.0",
