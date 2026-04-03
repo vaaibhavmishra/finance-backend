@@ -1,12 +1,12 @@
 # 💰 Finance Data Processing & Access Control Backend
 
-A production-ready RESTful API for managing financial records with **role-based access control**, **dashboard analytics**, and **comprehensive data validation**. Built with TypeScript, Express.js, Prisma ORM, and PostgreSQL.
+A production-ready RESTful API for managing financial records with **role-based access control**, **dashboard analytics**, and **comprehensive data validation**. Built with TypeScript, Express 5, Prisma ORM, and PostgreSQL.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Express](https://img.shields.io/badge/Express-4.21-green?logo=express)](https://expressjs.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.5-purple?logo=prisma)](https://www.prisma.io/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Express](https://img.shields.io/badge/Express-5.2-green?logo=express)](https://expressjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-7.6-purple?logo=prisma)](https://www.prisma.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)](https://www.postgresql.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)](https://www.docker.com/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ---
 
@@ -16,7 +16,7 @@ A production-ready RESTful API for managing financial records with **role-based 
 - [Tech Stack](#-tech-stack)
 - [Architecture](#-architecture)
 - [Quick Start](#-quick-start)
-- [Docker Setup](#-docker-setup)
+- [Available Scripts](#-available-scripts)
 - [API Documentation](#-api-documentation)
 - [API Endpoints](#-api-endpoints)
 - [Role-Based Access Control](#-role-based-access-control)
@@ -25,37 +25,41 @@ A production-ready RESTful API for managing financial records with **role-based 
 - [Environment Variables](#-environment-variables)
 - [Design Decisions & Assumptions](#-design-decisions--assumptions)
 - [Project Structure](#-project-structure)
+- [License](#-license)
 
 ---
 
 ## ✨ Features
 
 ### Core
-- **User & Role Management** — Create, manage, and assign roles (Viewer/Analyst/Admin)
+- **User & Role Management** — Create, manage, and assign roles (Viewer / Analyst / Admin)
 - **Financial Records CRUD** — Full create, read, update, soft-delete operations
 - **Dashboard Analytics** — Summary, category breakdown, trends, and recent activity
 - **Role-Based Access Control** — Middleware-enforced permission system
 
 ### Security
 - **JWT Authentication** — Access + refresh token flow with configurable expiry
-- **Password Hashing** — bcrypt with 12 salt rounds
+- **Password Hashing** — bcrypt with salted rounds
 - **Rate Limiting** — General (100 req/15min) + Auth-specific (20 req/15min)
 - **Helmet** — Security headers via `helmet`
 - **CORS** — Configurable cross-origin resource sharing
-- **Input Validation** — Zod schemas with detailed field-level errors
+- **Input Validation** — Zod 4 schemas with detailed field-level errors
 
 ### Data
-- **Prisma ORM** — Type-safe database access with PostgreSQL
+- **Prisma ORM** — Type-safe database access with PostgreSQL driver adapter (`@prisma/adapter-pg`)
 - **Soft Delete** — Financial records are soft-deleted (recoverable)
 - **Advanced Filtering** — Filter by type, category, date range, amount range, text search
 - **Pagination** — Consistent pagination with metadata (total, pages, hasNext, hasPrev)
 - **Sorting** — Configurable sort field and order on all list endpoints
 
 ### Developer Experience
+- **ES Modules** — Native ESM throughout the codebase
+- **Biome** — Fast, unified linter and formatter (replaces ESLint + Prettier)
+- **tsx** — Fast TypeScript execution for dev server and scripts
 - **Swagger/OpenAPI** — Interactive API documentation at `/api/docs`
 - **Winston Logging** — Structured logging to console + files
-- **Docker Support** — One-command setup with `docker-compose`
-- **TypeScript** — Full type safety across the entire codebase
+- **Postman Collection** — Pre-configured collection for all API endpoints
+- **TypeScript 6** — Full type safety across the entire codebase
 - **Seed Script** — Pre-populate database with realistic sample data
 
 ---
@@ -64,17 +68,19 @@ A production-ready RESTful API for managing financial records with **role-based 
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Runtime** | Node.js 20 | JavaScript runtime |
-| **Language** | TypeScript 5.5 | Type safety |
-| **Framework** | Express.js 4.21 | HTTP server & routing |
-| **ORM** | Prisma 6.5 | Type-safe database access |
+| **Runtime** | Node.js 20+ | JavaScript runtime |
+| **Language** | TypeScript 6.0 | Type safety |
+| **Framework** | Express.js 5.2 | HTTP server & routing |
+| **ORM** | Prisma 7.6 | Type-safe database access |
+| **DB Driver** | @prisma/adapter-pg + pg | PostgreSQL driver adapter |
 | **Database** | PostgreSQL 16 | Data persistence |
 | **Auth** | jsonwebtoken | JWT token management |
-| **Validation** | Zod | Schema validation |
+| **Validation** | Zod 4 | Schema validation |
+| **Linter/Formatter** | Biome | Unified linting & formatting |
 | **Docs** | swagger-jsdoc + swagger-ui-express | API documentation |
 | **Logging** | Winston | Structured logging |
 | **Security** | Helmet, CORS, express-rate-limit | Request protection |
-| **Container** | Docker + Docker Compose | Deployment |
+| **Package Manager** | pnpm | Fast, disk-efficient package manager |
 
 ---
 
@@ -84,8 +90,8 @@ The backend follows a **clean layered architecture** with clear separation of co
 
 ```
 Request → Route → Middleware → Controller → Service → Prisma → PostgreSQL
-                  (auth/rbac/    (HTTP      (business    (ORM)
-                   validate)     handling)   logic)
+                  (auth/rbac/    (HTTP      (business    (ORM +
+                   validate)     handling)   logic)      pg adapter)
 ```
 
 **Key Design Principles:**
@@ -101,16 +107,16 @@ Request → Route → Middleware → Controller → Service → Prisma → Postg
 
 ### Prerequisites
 
-- **Node.js** 18+ (recommended: 20)
-- **PostgreSQL** 14+ running locally (or use Docker)
-- **npm** 9+
+- **Node.js** 20+
+- **PostgreSQL** 14+ running locally or remotely
+- **pnpm** 9+
 
 ### 1. Clone & Install
 
 ```bash
 git clone https://github.com/your-username/finance-backend.git
 cd finance-backend
-npm install
+pnpm install
 ```
 
 ### 2. Configure Environment
@@ -124,19 +130,19 @@ cp .env.example .env
 
 ```bash
 # Generate Prisma client
-npx prisma generate
+pnpm prisma:generate
 
 # Run migrations to create tables
-npx prisma migrate dev --name init
+pnpm prisma:migrate
 
 # Seed the database with sample data
-npm run seed
+pnpm seed
 ```
 
 ### 4. Start Development Server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 The server starts at **http://localhost:3000**
@@ -146,31 +152,19 @@ The server starts at **http://localhost:3000**
 
 ---
 
-## 🐳 Docker Setup
+## 📜 Available Scripts
 
-The easiest way to get everything running — no local PostgreSQL needed:
-
-```bash
-# Start PostgreSQL + API (builds from source)
-docker-compose up -d --build
-
-# Run migrations inside the container
-docker-compose exec api npx prisma migrate deploy
-
-# Seed the database
-docker-compose exec api npx prisma db seed
-
-# View logs
-docker-compose logs -f api
-```
-
-**Stop everything:**
-```bash
-docker-compose down
-
-# To also remove the database volume:
-docker-compose down -v
-```
+| Script | Command | Description |
+|--------|---------|-------------|
+| **dev** | `pnpm dev` | Start dev server with hot-reload (tsx watch) |
+| **build** | `pnpm build` | Compile TypeScript to `dist/` |
+| **start** | `pnpm start` | Run production build |
+| **check** | `pnpm check` | Lint & format with Biome (auto-fix) |
+| **check-types** | `pnpm check-types` | Type-check without emitting |
+| **prisma:generate** | `pnpm prisma:generate` | Generate Prisma client |
+| **prisma:migrate** | `pnpm prisma:migrate` | Run database migrations |
+| **prisma:studio** | `pnpm prisma:studio` | Open Prisma Studio GUI |
+| **seed** | `pnpm seed` | Seed database with sample data |
 
 ---
 
@@ -186,6 +180,8 @@ OpenAPI JSON spec:
 ```
 http://localhost:3000/api/docs.json
 ```
+
+A **Postman collection** (`postman_collection.json`) is also included in the repository root for quick API testing and exploration.
 
 ---
 
@@ -221,6 +217,7 @@ http://localhost:3000/api/docs.json
 | `DELETE` | `/:id` | Soft delete record | Admin |
 
 **Query Parameters for `GET /records`:**
+
 | Param | Type | Description |
 |-------|------|-------------|
 | `page` | int | Page number (default: 1) |
@@ -301,9 +298,10 @@ The system enforces three roles with progressively increasing permissions:
 
 ## 🌱 Seed Data
 
-Run `npm run seed` to populate the database with:
+Run `pnpm seed` to populate the database with:
 
 - **4 Users** with different roles:
+
   | Email | Role | Password |
   |-------|------|----------|
   | admin@finance.app | ADMIN | Password123! |
@@ -341,13 +339,23 @@ Run `npm run seed` to populate the database with:
 
 1. **Layered Architecture** — Routes → Controllers → Services → Prisma. Controllers stay thin (HTTP only), services contain all business logic. This makes the codebase testable and maintainable.
 
-2. **Prisma over raw SQL** — Provides type-safe database access, auto-generated migrations, and a schema-as-code approach that serves as living documentation.
+2. **Prisma with Driver Adapter** — Uses `@prisma/adapter-pg` with the `pg` driver for direct PostgreSQL connections, giving more control over connection pooling and configuration.
 
-3. **PostgreSQL over MongoDB** — Relational database is a better fit for financial data that benefits from ACID transactions, strict schemas, and efficient aggregation queries.
+3. **Express 5** — Upgraded to Express 5 for native async error handling, better route parameter typing, and modern middleware patterns.
 
-4. **JWT Access + Refresh Token Pattern** — Short-lived access tokens (15 min) with long-lived refresh tokens (7 days) balance security with user experience.
+4. **ES Modules** — The entire codebase uses native ESM (`"type": "module"`) for modern import/export syntax and better tree-shaking support.
 
-5. **Soft Delete for Records** — Financial records use soft delete (`isDeleted` flag) to preserve audit trails. The flag is automatically filtered in queries.
+5. **Biome over ESLint + Prettier** — Biome provides unified linting and formatting in a single, significantly faster tool. Reduces tooling complexity and speeds up CI.
+
+6. **pnpm over npm** — Faster installs, strict dependency resolution, and disk-efficient storage via content-addressable filesystem.
+
+7. **Zod 4** — Schema validation with TypeScript-native type inference, reducing duplication between runtime validation and static types.
+
+8. **PostgreSQL over MongoDB** — Relational database is a better fit for financial data that benefits from ACID transactions, strict schemas, and efficient aggregation queries.
+
+9. **JWT Access + Refresh Token Pattern** — Short-lived access tokens (15 min) with long-lived refresh tokens (7 days) balance security with user experience.
+
+10. **Soft Delete for Records** — Financial records use soft delete (`isDeleted` flag) to preserve audit trails. The flag is automatically filtered in queries.
 
 ### Assumptions
 
@@ -363,11 +371,11 @@ Run `npm run seed` to populate the database with:
 
 ### Tradeoffs
 
-1. **Zod over class-validator** — Zod is more TypeScript-native and allows schema inference for types, reducing duplication. Tradeoff: slightly less mature ecosystem for NestJS-style decorators.
+1. **No separate DTO layer** — Prisma's generated types + Zod inferred types serve as DTOs, keeping the codebase lean. A larger application might benefit from explicit DTO classes.
 
-2. **No separate DTO layer** — Prisma's generated types + Zod inferred types serve as DTOs, keeping the codebase lean. A larger application might benefit from explicit DTO classes.
+2. **In-memory rate limiting** — Uses `express-rate-limit` without external store (no Redis). Works well for single-instance deployments but would need Redis for horizontal scaling.
 
-3. **In-memory rate limiting** — Uses `express-rate-limit` without external store (no Redis). Works well for single-instance deployments but would need Redis for horizontal scaling.
+3. **tsx for production start** — The production `start` script uses `node --import tsx/esm` for TypeScript path resolution. For maximum performance at scale, a pure compiled JS approach may be preferred.
 
 ---
 
@@ -376,25 +384,28 @@ Run `npm run seed` to populate the database with:
 ```
 finance-backend/
 ├── prisma/
-│   ├── schema.prisma          # Database schema & models
-│   └── seed.ts                # Database seed script
+│   ├── migrations/               # Database migration history
+│   ├── schema.prisma             # Database schema & models
+│   └── seed.ts                   # Database seed script
 ├── src/
 │   ├── config/
-│   │   ├── constants.ts       # App-wide enums & constants
-│   │   ├── database.ts        # Prisma client & connection
-│   │   ├── environment.ts     # Env variable validation (Zod)
-│   │   └── swagger.ts         # OpenAPI/Swagger configuration
+│   │   ├── constants.ts          # App-wide enums & constants
+│   │   ├── database.ts           # Database connection & adapter
+│   │   ├── environment.ts        # Env variable validation (Zod)
+│   │   └── swagger.ts            # OpenAPI/Swagger configuration
 │   ├── controllers/
 │   │   ├── auth.controller.ts
 │   │   ├── dashboard.controller.ts
 │   │   ├── record.controller.ts
 │   │   └── user.controller.ts
+│   ├── lib/
+│   │   └── prisma.ts             # Centralized PrismaClient instance
 │   ├── middleware/
-│   │   ├── auth.middleware.ts      # JWT verification
-│   │   ├── error.middleware.ts     # Global error handler
-│   │   ├── rateLimiter.middleware.ts
-│   │   ├── rbac.middleware.ts      # Role authorization
-│   │   └── validate.middleware.ts  # Zod validation
+│   │   ├── auth.middleware.ts        # JWT verification
+│   │   ├── error.middleware.ts       # Global error handler
+│   │   ├── rateLimiter.middleware.ts  # Rate limiting
+│   │   ├── rbac.middleware.ts        # Role authorization
+│   │   └── validate.middleware.ts    # Zod validation
 │   ├── routes/
 │   │   ├── auth.routes.ts
 │   │   ├── dashboard.routes.ts
@@ -406,25 +417,27 @@ finance-backend/
 │   │   ├── record.service.ts
 │   │   └── user.service.ts
 │   ├── types/
-│   │   └── index.ts           # Shared TypeScript interfaces
+│   │   └── index.ts              # Shared TypeScript interfaces
 │   ├── utils/
-│   │   ├── ApiError.ts        # Custom error class
-│   │   ├── ApiResponse.ts     # Response wrapper
-│   │   ├── asyncHandler.ts    # Async error catcher
-│   │   └── logger.ts          # Winston logger
+│   │   ├── ApiError.ts           # Custom error class
+│   │   ├── ApiResponse.ts        # Response wrapper
+│   │   ├── asyncHandler.ts       # Async error catcher
+│   │   └── logger.ts             # Winston logger
 │   ├── validators/
 │   │   ├── auth.validator.ts
 │   │   ├── dashboard.validator.ts
 │   │   ├── record.validator.ts
 │   │   └── user.validator.ts
-│   ├── app.ts                 # Express app setup
-│   └── server.ts              # Server entry point
-├── .env.example               # Environment template
+│   ├── app.ts                    # Express app setup
+│   └── server.ts                 # Server entry point
+├── .env.example                  # Environment template
 ├── .gitignore
-├── .prettierrc
-├── docker-compose.yml         # Docker orchestration
-├── Dockerfile                 # Multi-stage build
+├── biome.json                    # Biome linter/formatter config
+├── LICENSE                       # AGPL-3.0 license
 ├── package.json
+├── pnpm-lock.yaml
+├── postman_collection.json       # Postman API testing collection
+├── prisma.config.ts              # Prisma configuration
 ├── tsconfig.json
 └── README.md
 ```
@@ -472,7 +485,13 @@ All API responses follow a consistent structure:
 
 ## 📄 License
 
-MIT — See [LICENSE](LICENSE) for details.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** — see the [LICENSE](LICENSE) file for details.
+
+This means:
+- ✅ You can view, fork, and modify the source code
+- ✅ You can use it for personal and educational purposes
+- ❌ You **cannot** use it commercially without releasing your full source code under the same license
+- ❌ You **cannot** offer it as a closed-source network service
 
 ---
 
