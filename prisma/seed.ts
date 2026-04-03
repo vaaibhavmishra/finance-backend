@@ -1,7 +1,19 @@
-import { PrismaClient, Role, UserStatus, RecordType, Category } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+import {
+  Category,
+  PrismaClient,
+  RecordType,
+  Role,
+  UserStatus,
+} from '../src/generated/prisma/client';
 
-const prisma = new PrismaClient();
+dotenv.config();
+
+const connectionString = process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString });
+const prisma = new PrismaClient({ adapter });
 
 // ============================================
 // Seed Data
