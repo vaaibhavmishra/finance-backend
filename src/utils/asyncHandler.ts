@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * Wraps an async route handler to catch errors and forward them

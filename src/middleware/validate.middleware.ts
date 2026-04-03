@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { ZodSchema, ZodError } from 'zod';
+import type { NextFunction, Request, Response } from 'express';
+import { ZodError, type ZodSchema } from 'zod';
 import { ApiError } from '../utils/ApiError';
 
 /**
@@ -17,7 +17,13 @@ export const validate = (schema: ZodSchema, source: 'body' | 'query' | 'params' 
     try {
       const parsed = schema.parse(req[source]);
       // Replace the source with parsed (and transformed) data
-      req[source] = parsed;
+      // Using Object.defineProperty to support Express 5 where req.query has only a getter
+      Object.defineProperty(req, source, {
+        value: parsed,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
       next();
     } catch (error) {
       if (error instanceof ZodError) {
@@ -31,7 +37,8 @@ export const validate = (schema: ZodSchema, source: 'body' | 'query' | 'params' 
           fieldErrors[path].push(issue.message);
         }
 
-        return next(ApiError.badRequest('Validation failed', fieldErrors));
+        next(ApiError.badRequest('Validation failed', fieldErrors));
+        return;
       }
 
       next(error);

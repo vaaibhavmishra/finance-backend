@@ -7,7 +7,12 @@ export const dashboardQuerySchema = z.object({
 
 export const trendQuerySchema = z.object({
   period: z.enum(['weekly', 'monthly']).optional().default('monthly'),
-  months: z.string().optional().default('6').transform(Number).pipe(z.number().int().min(1).max(24)),
+  months: z
+    .string()
+    .optional()
+    .default('6')
+    .transform(Number)
+    .pipe(z.number().int().min(1).max(24)),
 });
 
 export type DashboardQuery = z.infer<typeof dashboardQuerySchema>;

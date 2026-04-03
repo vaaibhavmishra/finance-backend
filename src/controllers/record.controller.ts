@@ -1,8 +1,10 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { RecordService } from '../services/record.service';
+import type { AuthRequest } from '../types';
+import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
-import { AuthRequest } from '../types';
+import type { ListRecordsQuery } from '../validators/record.validator';
 
 /**
  * @swagger
@@ -10,7 +12,7 @@ import { AuthRequest } from '../types';
  *   name: Financial Records
  *   description: CRUD operations for financial records
  */
-export class RecordController {
+export const RecordController = {
   /**
    * @swagger
    * /api/v1/records:
@@ -49,10 +51,11 @@ export class RecordController {
    *       403:
    *         description: Forbidden (non-admin)
    */
-  static create = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const record = await RecordService.createRecord(req.body, req.user!.id);
+  create: asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized('Not authenticated');
+    const record = await RecordService.createRecord(req.body, req.user.id);
     res.status(201).json(ApiResponse.created(record, 'Financial record created'));
-  });
+  }),
 
   /**
    * @swagger
@@ -100,13 +103,12 @@ export class RecordController {
    *       200:
    *         description: Records list with pagination
    */
-  static list = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { records, total } = await RecordService.listRecords(req.query as any);
-    const { page, limit } = req.query as any;
-    res
-      .status(200)
-      .json(ApiResponse.paginated(records, total, page, limit, 'Records retrieved'));
-  });
+  list: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const query = req.query as unknown as ListRecordsQuery;
+    const { records, total } = await RecordService.listRecords(query);
+    const { page, limit } = query;
+    res.status(200).json(ApiResponse.paginated(records, total, page, limit, 'Records retrieved'));
+  }),
 
   /**
    * @swagger
@@ -127,10 +129,10 @@ export class RecordController {
    *       404:
    *         description: Not found
    */
-  static getById = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const record = await RecordService.getRecordById(req.params.id);
+  getById: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const record = await RecordService.getRecordById(req.params.id as string);
     res.status(200).json(ApiResponse.ok(record, 'Record retrieved'));
-  });
+  }),
 
   /**
    * @swagger
@@ -161,10 +163,10 @@ export class RecordController {
    *       200:
    *         description: Record updated
    */
-  static update = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const record = await RecordService.updateRecord(req.params.id, req.body);
+  update: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const record = await RecordService.updateRecord(req.params.id as string, req.body);
     res.status(200).json(ApiResponse.ok(record, 'Record updated'));
-  });
+  }),
 
   /**
    * @swagger
@@ -183,8 +185,8 @@ export class RecordController {
    *       200:
    *         description: Record deleted
    */
-  static delete = asyncHandler(async (req: AuthRequest, res: Response) => {
-    await RecordService.deleteRecord(req.params.id);
+  delete: asyncHandler(async (req: AuthRequest, res: Response) => {
+    await RecordService.deleteRecord(req.params.id as string);
     res.status(200).json(ApiResponse.noContent('Record deleted successfully'));
-  });
-}
+  }),
+};

@@ -1,8 +1,9 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { AuthService } from '../services/auth.service';
+import type { AuthRequest } from '../types';
+import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
-import { AuthRequest } from '../types';
 
 /**
  * @swagger
@@ -10,7 +11,7 @@ import { AuthRequest } from '../types';
  *   name: Authentication
  *   description: User registration, login, and token management
  */
-export class AuthController {
+export const AuthController = {
   /**
    * @swagger
    * /api/v1/auth/register:
@@ -46,10 +47,10 @@ export class AuthController {
    *       409:
    *         description: Email already exists
    */
-  static register = asyncHandler(async (req: AuthRequest, res: Response) => {
+  register: asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await AuthService.register(req.body);
     res.status(201).json(ApiResponse.created(result, 'User registered successfully'));
-  });
+  }),
 
   /**
    * @swagger
@@ -77,10 +78,10 @@ export class AuthController {
    *       401:
    *         description: Invalid credentials
    */
-  static login = asyncHandler(async (req: AuthRequest, res: Response) => {
+  login: asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await AuthService.login(req.body);
     res.status(200).json(ApiResponse.ok(result, 'Login successful'));
-  });
+  }),
 
   /**
    * @swagger
@@ -104,10 +105,10 @@ export class AuthController {
    *       401:
    *         description: Invalid refresh token
    */
-  static refresh = asyncHandler(async (req: AuthRequest, res: Response) => {
+  refresh: asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await AuthService.refreshToken(req.body.refreshToken);
     res.status(200).json(ApiResponse.ok(result, 'Token refreshed successfully'));
-  });
+  }),
 
   /**
    * @swagger
@@ -123,8 +124,11 @@ export class AuthController {
    *       401:
    *         description: Not authenticated
    */
-  static me = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const user = await AuthService.getProfile(req.user!.id);
+  me: asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      throw ApiError.unauthorized('Not authenticated');
+    }
+    const user = await AuthService.getProfile(req.user.id);
     res.status(200).json(ApiResponse.ok(user, 'Profile retrieved'));
-  });
-}
+  }),
+};

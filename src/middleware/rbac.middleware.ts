@@ -1,7 +1,7 @@
-import { Response, NextFunction } from 'express';
-import { Role } from '@prisma/client';
+import type { Role } from '@prisma/client';
+import type { NextFunction, Response } from 'express';
+import type { AuthRequest } from '../types';
 import { ApiError } from '../utils/ApiError';
-import { AuthRequest } from '../types';
 
 /**
  * Role-Based Access Control middleware factory.
@@ -14,15 +14,17 @@ import { AuthRequest } from '../types';
 export const authorize = (...allowedRoles: Role[]) => {
   return (req: AuthRequest, _res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return next(ApiError.unauthorized('Authentication required'));
+      next(ApiError.unauthorized('Authentication required'));
+      return;
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return next(
+      next(
         ApiError.forbidden(
           `Access denied. Required role(s): ${allowedRoles.join(', ')}. Your role: ${req.user.role}`,
         ),
       );
+      return;
     }
 
     next();

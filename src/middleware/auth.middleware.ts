@@ -1,9 +1,9 @@
-import { Response, NextFunction } from 'express';
+import type { NextFunction, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/environment';
-import { prisma } from '../config/database';
+import { prisma } from '../lib/prisma';
+import type { AuthRequest, TokenPayload } from '../types';
 import { ApiError } from '../utils/ApiError';
-import { AuthRequest, TokenPayload } from '../types';
 
 /**
  * Authentication middleware — verifies JWT token and attaches user to request.
@@ -18,8 +18,10 @@ export const authenticate = async (
     // 1. Extract token from Authorization header
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw ApiError.unauthorized('Access token is required. Provide: Authorization: Bearer <token>');
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw ApiError.unauthorized(
+        'Access token is required. Provide: Authorization: Bearer <token>',
+      );
     }
 
     const token = authHeader.split(' ')[1];
@@ -58,9 +60,7 @@ export const authenticate = async (
     }
 
     if (user.status === 'INACTIVE') {
-      throw ApiError.forbidden(
-        'Your account has been deactivated. Contact an administrator.',
-      );
+      throw ApiError.forbidden('Your account has been deactivated. Contact an administrator.');
     }
 
     // 5. Attach user to request

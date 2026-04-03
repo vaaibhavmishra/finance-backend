@@ -1,8 +1,10 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { UserService } from '../services/user.service';
+import type { AuthRequest } from '../types';
+import { ApiError } from '../utils/ApiError';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
-import { AuthRequest } from '../types';
+import type { ListUsersQuery } from '../validators/user.validator';
 
 /**
  * @swagger
@@ -10,7 +12,7 @@ import { AuthRequest } from '../types';
  *   name: Users
  *   description: User management (Admin only)
  */
-export class UserController {
+export const UserController = {
   /**
    * @swagger
    * /api/v1/users:
@@ -41,11 +43,12 @@ export class UserController {
    *       403:
    *         description: Forbidden
    */
-  static list = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { users, total } = await UserService.listUsers(req.query as any);
-    const { page, limit } = req.query as any;
+  list: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const query = req.query as unknown as ListUsersQuery;
+    const { users, total } = await UserService.listUsers(query);
+    const { page, limit } = query;
     res.status(200).json(ApiResponse.paginated(users, total, page, limit, 'Users retrieved'));
-  });
+  }),
 
   /**
    * @swagger
@@ -66,10 +69,10 @@ export class UserController {
    *       404:
    *         description: User not found
    */
-  static getById = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const user = await UserService.getUserById(req.params.id);
+  getById: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const user = await UserService.getUserById(req.params.id as string);
     res.status(200).json(ApiResponse.ok(user, 'User retrieved'));
-  });
+  }),
 
   /**
    * @swagger
@@ -99,10 +102,11 @@ export class UserController {
    *       200:
    *         description: Role updated
    */
-  static updateRole = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const user = await UserService.updateRole(req.params.id, req.body, req.user!.id);
+  updateRole: asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized('Not authenticated');
+    const user = await UserService.updateRole(req.params.id as string, req.body, req.user.id);
     res.status(200).json(ApiResponse.ok(user, 'User role updated'));
-  });
+  }),
 
   /**
    * @swagger
@@ -132,10 +136,11 @@ export class UserController {
    *       200:
    *         description: Status updated
    */
-  static updateStatus = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const user = await UserService.updateStatus(req.params.id, req.body, req.user!.id);
+  updateStatus: asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized('Not authenticated');
+    const user = await UserService.updateStatus(req.params.id as string, req.body, req.user.id);
     res.status(200).json(ApiResponse.ok(user, 'User status updated'));
-  });
+  }),
 
   /**
    * @swagger
@@ -154,8 +159,9 @@ export class UserController {
    *       200:
    *         description: User deleted
    */
-  static delete = asyncHandler(async (req: AuthRequest, res: Response) => {
-    await UserService.deleteUser(req.params.id, req.user!.id);
+  delete: asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.user) throw ApiError.unauthorized('Not authenticated');
+    await UserService.deleteUser(req.params.id as string, req.user.id);
     res.status(200).json(ApiResponse.noContent('User deleted successfully'));
-  });
-}
+  }),
+};

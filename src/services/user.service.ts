@@ -1,16 +1,20 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '../config/database';
+import type { Prisma } from '@prisma/client';
+import { prisma } from '../lib/prisma';
 import { ApiError } from '../utils/ApiError';
-import { UpdateRoleInput, UpdateStatusInput, ListUsersQuery } from '../validators/user.validator';
+import type {
+  ListUsersQuery,
+  UpdateRoleInput,
+  UpdateStatusInput,
+} from '../validators/user.validator';
 
 /**
  * User Service — handles user management operations (admin only)
  */
-export class UserService {
+export const UserService = {
   /**
    * List all users with filtering, pagination, and search
    */
-  static async listUsers(query: ListUsersQuery) {
+  async listUsers(query: ListUsersQuery) {
     const { page, limit, role, status, search, sortBy, sortOrder } = query;
     const skip = (page - 1) * limit;
 
@@ -54,12 +58,12 @@ export class UserService {
     }));
 
     return { users: formattedUsers, total };
-  }
+  },
 
   /**
    * Get a single user by ID
    */
-  static async getUserById(id: string) {
+  async getUserById(id: string) {
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -83,12 +87,12 @@ export class UserService {
       totalRecords: user._count.records,
       _count: undefined,
     };
-  }
+  },
 
   /**
    * Update a user's role
    */
-  static async updateRole(id: string, data: UpdateRoleInput, requesterId: string) {
+  async updateRole(id: string, data: UpdateRoleInput, requesterId: string) {
     // Prevent self-role downgrade
     if (id === requesterId) {
       throw ApiError.badRequest('You cannot change your own role');
@@ -113,12 +117,12 @@ export class UserService {
     });
 
     return updated;
-  }
+  },
 
   /**
    * Update a user's status (activate/deactivate)
    */
-  static async updateStatus(id: string, data: UpdateStatusInput, requesterId: string) {
+  async updateStatus(id: string, data: UpdateStatusInput, requesterId: string) {
     // Prevent self-deactivation
     if (id === requesterId) {
       throw ApiError.badRequest('You cannot change your own status');
@@ -143,12 +147,12 @@ export class UserService {
     });
 
     return updated;
-  }
+  },
 
   /**
    * Delete a user (hard delete — cascades to records)
    */
-  static async deleteUser(id: string, requesterId: string) {
+  async deleteUser(id: string, requesterId: string) {
     // Prevent self-deletion
     if (id === requesterId) {
       throw ApiError.badRequest('You cannot delete your own account');
@@ -160,5 +164,5 @@ export class UserService {
     }
 
     await prisma.user.delete({ where: { id } });
-  }
-}
+  },
+};

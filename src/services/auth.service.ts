@@ -1,20 +1,19 @@
 import bcrypt from 'bcryptjs';
-import jwt, { SignOptions } from 'jsonwebtoken';
-import { prisma } from '../config/database';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import { env } from '../config/environment';
+import { prisma } from '../lib/prisma';
+import type { TokenPayload } from '../types';
 import { ApiError } from '../utils/ApiError';
-import { TokenPayload } from '../types';
-import { RegisterInput, LoginInput } from '../validators/auth.validator';
-
+import type { LoginInput, RegisterInput } from '../validators/auth.validator';
 
 /**
  * Auth Service — handles registration, login, and token management
  */
-export class AuthService {
+export const AuthService = {
   /**
    * Register a new user
    */
-  static async register(data: RegisterInput) {
+  async register(data: RegisterInput) {
     // Check if email already exists
     const existing = await prisma.user.findUnique({
       where: { email: data.email },
@@ -46,7 +45,7 @@ export class AuthService {
     });
 
     // Generate tokens
-    const tokens = this.generateTokens({
+    const tokens = AuthService.generateTokens({
       id: user.id,
       email: user.email,
       role: user.role,
@@ -54,12 +53,12 @@ export class AuthService {
     });
 
     return { user, ...tokens };
-  }
+  },
 
   /**
    * Login with email and password
    */
-  static async login(data: LoginInput) {
+  async login(data: LoginInput) {
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: data.email },
@@ -82,7 +81,7 @@ export class AuthService {
     }
 
     // Generate tokens
-    const tokens = this.generateTokens({
+    const tokens = AuthService.generateTokens({
       id: user.id,
       email: user.email,
       role: user.role,
@@ -100,12 +99,12 @@ export class AuthService {
       },
       ...tokens,
     };
-  }
+  },
 
   /**
    * Refresh access token using a refresh token
    */
-  static async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string) {
     let decoded: TokenPayload;
 
     try {
@@ -133,18 +132,18 @@ export class AuthService {
     }
 
     // Generate new tokens
-    return this.generateTokens({
+    return AuthService.generateTokens({
       id: user.id,
       email: user.email,
       role: user.role,
       status: user.status,
     });
-  }
+  },
 
   /**
    * Get current user profile
    */
-  static async getProfile(userId: string) {
+  async getProfile(userId: string) {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -168,25 +167,20 @@ export class AuthService {
       totalRecords: user._count.records,
       _count: undefined,
     };
-  }
+  },
 
   /**
    * Generate access and refresh token pair
    */
-  private static generateTokens(payload: Omit<TokenPayload, 'type'>) {
-    const accessToken = jwt.sign(
-      { ...payload, type: 'access' },
-      env.JWT_SECRET,
-      { expiresIn: env.JWT_EXPIRES_IN } as SignOptions,
-    );
+  generateTokens(payload: Omit<TokenPayload, 'type'>) {
+    const accessToken = jwt.sign({ ...payload, type: 'access' }, env.JWT_SECRET, {
+      expiresIn: env.JWT_EXPIRES_IN,
+    } as SignOptions);
 
-    const refreshToken = jwt.sign(
-      { ...payload, type: 'refresh' },
-      env.JWT_REFRESH_SECRET,
-      { expiresIn: env.JWT_REFRESH_EXPIRES_IN } as SignOptions,
-    );
+    const refreshToken = jwt.sign({ ...payload, type: 'refresh' }, env.JWT_REFRESH_SECRET, {
+      expiresIn: env.JWT_REFRESH_EXPIRES_IN,
+    } as SignOptions);
 
     return { accessToken, refreshToken };
-  }
-
-}
+  },
+};
