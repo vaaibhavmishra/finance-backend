@@ -1,5 +1,5 @@
-import type { Role, UserStatus } from '@prisma/client';
 import type { Request } from 'express';
+import type { Role, UserStatus } from '../generated/prisma/client';
 
 /**
  * Authenticated user payload attached to request
