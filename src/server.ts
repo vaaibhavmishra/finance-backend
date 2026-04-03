@@ -1,6 +1,7 @@
 import app from './app';
+// import { connectDatabase, disconnectDatabase } from './config/database'
 import { env } from './config/environment';
-import { connectDatabase, disconnectDatabase } from './config/database';
+import { prisma } from './lib/prisma';
 import { logger } from './utils/logger';
 
 /**
@@ -10,7 +11,7 @@ import { logger } from './utils/logger';
 async function bootstrap(): Promise<void> {
   try {
     // Connect to database
-    await connectDatabase();
+    // await connectDatabase();
 
     // Start server
     const server = app.listen(env.PORT, () => {
@@ -33,7 +34,8 @@ async function bootstrap(): Promise<void> {
       logger.info(`\n${signal} received. Shutting down gracefully...`);
 
       server.close(async () => {
-        await disconnectDatabase();
+        await prisma.$disconnect();
+        logger.info('🔌 Database disconnected');
         logger.info('Server closed. Goodbye! 👋');
         process.exit(0);
       });

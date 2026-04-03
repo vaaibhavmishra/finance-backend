@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { AuthController } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { validate } from '../middleware/validate.middleware';
 import { authLimiter } from '../middleware/rateLimiter.middleware';
-import { registerSchema, loginSchema, refreshTokenSchema } from '../validators/auth.validator';
+import { validate } from '../middleware/validate.middleware';
+import { loginSchema, refreshTokenSchema, registerSchema } from '../validators/auth.validator';
 
-const router = Router();
+const router: Router = Router();
 
 // Public routes (with auth rate limiter)
 router.post('/register', authLimiter, validate(registerSchema), AuthController.register);

@@ -5,7 +5,7 @@ import { authorize } from '../middleware/rbac.middleware';
 import { validate } from '../middleware/validate.middleware';
 import { dashboardQuerySchema, trendQuerySchema } from '../validators/dashboard.validator';
 
-const router = Router();
+const router: Router = Router();
 
 // Dashboard routes require ANALYST or ADMIN role
 router.use(authenticate, authorize('ANALYST', 'ADMIN'));

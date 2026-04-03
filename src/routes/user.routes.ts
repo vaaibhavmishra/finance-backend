@@ -4,13 +4,13 @@ import { authenticate } from '../middleware/auth.middleware';
 import { authorize } from '../middleware/rbac.middleware';
 import { validate } from '../middleware/validate.middleware';
 import {
+  listUsersQuerySchema,
   updateRoleSchema,
   updateStatusSchema,
   userIdParamSchema,
-  listUsersQuerySchema,
 } from '../validators/user.validator';
 
-const router = Router();
+const router: Router = Router();
 
 // All user management routes require ADMIN role
 router.use(authenticate, authorize('ADMIN'));

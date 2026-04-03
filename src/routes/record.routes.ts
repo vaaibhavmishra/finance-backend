@@ -5,12 +5,12 @@ import { authorize } from '../middleware/rbac.middleware';
 import { validate } from '../middleware/validate.middleware';
 import {
   createRecordSchema,
-  updateRecordSchema,
-  recordIdParamSchema,
   listRecordsQuerySchema,
+  recordIdParamSchema,
+  updateRecordSchema,
 } from '../validators/record.validator';
 
-const router = Router();
+const router: Router = Router();
 
 // All record routes require authentication
 router.use(authenticate);
